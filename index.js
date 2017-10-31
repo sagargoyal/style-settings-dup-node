@@ -3,6 +3,7 @@ var io = require('indian-ocean');
 var parse = require('csv-parse/lib/sync');
 var readDir = require('readdir');
 var path = require('path');
+var fs = require("fs");
 var firebaseAdmin = require('firebase-admin');
 const firebase = require('firebase');
 var serviceAccount = require('/Users/akashpaul/Documents/abvr/cred/norahanimation-firebase-adminsdk-qmwir-c655942ff4.json');
@@ -19,62 +20,54 @@ const app = firebase.initializeApp({
 const db = app.database();
 const PROJECT_ID = "norahanimation";
 
-var count=0;
-var count2=0;
-var styleArray=[];
-var libraryArray=[];
-var matchedArray=[];
+var styleCount =      0;
+var libraryCount =    0;
+var styleArray =     [];
+var libraryArray =   [];
+var matchedArray =   [];
 
-// Push UIDs & number of style entries 
+// Push UIDs & number of style entries
 var style_data = io.readDataSync('uid_style_and_lib.csv',function (row, i, columns) {
-    
-    count=count+1;
+    styleCount=styleCount+1;
     row.number = +row.number // Convert this value to a number
     //console.log(count+" with UID "+row.uid+" "+row.number);
     poolArray.push({'uid':row.uid,'styleNumber':row.number})
     //console.log(poolArray[count-1].uid);
     return row
   })
-  var lib_data = io.readDataSync('uid_lib_nos.csv',function (row, i, columns) {
-    
-   count=count+1;
-   row.number = +row.number // Convert this value to a number
-   //console.log(count+" with UID "+row.uid+" "+row.number);
-   poolArray.push({'uid':row.uid,'libraryNumber':row.number})
-   //console.log(poolArray[count-1].uid);
-   return row
+
+// Push UIDs & number of library entries
+var lib_data = io.readDataSync('uid_lib_nos.csv',function (row, i, columns) {
+    libraryCount=libraryCount+1;
+    row.number = +row.number // Convert this value to a number
+    //console.log(count+" with UID "+row.uid+" "+row.number);
+    poolArray.push({'uid':row.uid,'libraryNumber':row.number})
+    //console.log(poolArray[count-1].uid);
+    return row
  })
 
 // Push UID & email to list/matchedArray
-  var fs = require("fs");
-  console.log("\n *STARTING* \n");
- // Get content from file
-  var contents = fs.readFileSync("users-30oct.json");
- // Define to JSON type
-  var jsonContent = JSON.parse(contents);
- // Get Value from JSON
- for( var item in jsonContent.users){
-  //console.log("User Name:", jsonContent.users[item].email);
-  matchedArray.push({'uid':jsonContent.users[item].localId,'email':jsonContent.users[item].email});
+var contents = fs.readFileSync("users-30oct.json");
+var jsonContent = JSON.parse(contents);
+for( var item in jsonContent.users){
+    matchedArray.push({'uid':jsonContent.users[item].localId,'email':jsonContent.users[item].email});
 }
   
-
-
-
 //setNoOfDownloads("1ewdtrdwtr1",4);
 getNoOfDownloads("dohou.michael@gmail.com");
 
+
+//Functions
 function getNoOfDownloads(email){
     console.log("Got "+email)
     var totalDownloads;
     //console.log(matchedArray)
     for (item of matchedArray){
- //console.log(item['email'])
-if(item['email'] == email){
-    console.log("got a bugger "+item['uid']);
-}
+        if(item['email'] == email){
+        console.log("got a bugger "+item['uid']);
+        }
     }
-return totalDownloads;
+    return totalDownloads;
 }
 
 function setNoOfDownloads(uid,target){
@@ -90,6 +83,7 @@ function setNoOfDownloads(uid,target){
     
 }
 
+//--------------------------------------------------------------------------------------------------
 
 // ANIM upload
 
@@ -345,4 +339,5 @@ var json_data = io.readJson('users-30oct.json',function (row, i) {
 matchedArray.push({'uid':item.localId,'email':item.email})}
    count2=count2+1;
  })
+ //console.log(item['email'])
 */
