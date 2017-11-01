@@ -1,5 +1,5 @@
 "use strict";
-setTimeout(test,15000);
+setTimeout(addStylesAndLibrary,5000);
 var io = require('indian-ocean');
 var parse = require('csv-parse/lib/sync');
 var readDir = require('readdir');
@@ -13,11 +13,8 @@ firebaseAdmin.initializeApp({
     credential: firebaseAdmin.credential.cert(serviceAccount),
     databaseURL: 'https://norahanimation.firebaseio.com'
 });
-// an array of all JavaScript files in some_path/
-const app = firebase.initializeApp({
-    // Configure your application here
-    databaseURL: "https://norahanimation.firebaseio.com"
-})
+
+const app = firebase.initializeApp({ databaseURL: "https://norahanimation.firebaseio.com" })
 const db = app.database();
 const PROJECT_ID = "norahanimation";
 var styleCount =      0;
@@ -49,79 +46,80 @@ var lib_data = io.readDataSync('uid_lib_nos.csv',function (row, i, columns) {
 // Read usernamesnode data
 var usernamesnode = fs.readFileSync("usernamesnode.json");
 var jsonUserNamesNodeContent = JSON.parse(usernamesnode); 
-
 // Push UID & email to list/matchedArray
 var contents = fs.readFileSync("users-30oct.json");
 var jsonContent = JSON.parse(contents);
 for( var item in jsonContent.users){
     matchedArray.push({'uid':jsonContent.users[item].localId,'email':jsonContent.users[item].email});
 }
-
 // Reads target UIDs & target Style numbers
 var style2b_data = io.readDataSync('style_users_2b.csv',function (row, i, columns) {
-    //console.log(row.number);
-    var rand = getRandomInt(1,60); //TODO:  If you want to increase the values
+    var rand = getRandomInt(1,60);                          // Mylibrary variator
     style2bArray.push({'email':row.email,'styleNumber':row.number, 'libraryNumber':rand})
-    //console.log(poolArray[count-1].uid);
     return row
 })
 
-addStylesAndLibrary();
+// Main() ---------------------------------------------------------------------------------------
 
 
-// Functions
-function test(){console.log("15 seconds up")}
+
+// Functions()  ---------------------------------------------------------------------------------
 function getNoOfDownloads(email){
-    console.log("Got "+email)
-    var totalDownloads;
-    //console.log(matchedArray)
+    console.log("Checking presence of "+email)
     for (item of matchedArray){
-            if(item['email'] && item['email'].toLowerCase() == email.toLowerCase()){
-            console.log("got a bugger "+item['uid']);
-        }
+            if(item['email'] ||item['email'].toLowerCase() == email.toLowerCase()){
+                console.log("Got the bugger "+item['uid']);
+            return item['uid'];
+            }
+            else {
+                console.log("Sorry not in here")
+            return 0; 
+            }
     }
-    return totalDownloads;
+return 0;
 }
 
 function addStylesAndLibrary(){
     //for(var i =0;i<style2bArray.length;i++){ //Use this in final code TODO
-    for(var i =0;i<5;i++){
+    for(var i =0;i<style2bArray.length;i++){
       var updates = {};
-      console.log(style2bArray[i].email)
-      var uid = getNoOfDownloads(style2bArray[i].uid);//TODO
-      console.log(uid);
-      //  var ref = db.ref.child(uid) //TODO
-      console.log(style2bArray[i].styleNumber);
-      console.log(style2bArray[i].libraryNumber);
-
-      //for(var j = 0 ;j<style2bArray[i].styleNumber;j++){i //TODO
-      for(var j = 0 ;j<1;j++){
-         /*
+      console.log(style2bArray[i].email+" "+i);
+    //   console.log(style2bArray[i].styleNumber);
+    //   console.log(style2bArray[i].libraryNumber);
+      var uid = getNoOfDownloads(style2bArray[i].email.toLowerCase()); //TODO
+      if (uid==0){
+          console.log("No proper UID found ");
+        return 0;
+        }
+    //   console.log("For this UID "+uid);
+      var ref = db.ref("usernames").child(uid) //TODO
+      for(var j = 0; j < style2bArray[i].styleNumber; j++){ //TODO
+        for(var m = 0; m < i; m++){
+         
             var random = getRandomInt(0,styleArray.length);
             var randomStyleNodeUid = styleArray[random].uid;
-            console.log(randomStyleNodeUid);
-            var obj = jsonUserNamesNodeContent[randomStyleNodeUid]['mylibrary'];
-            var array = Object.keys(jsonUserNamesNodeContent[randomStyleNodeUid]['mylibrary'])
-            var randomStyleNode = obj[array[getRandomInt(0,array.length)]];
-         */
-            var randomStyleNode = getRandomNode(styleArray,'mylibrary');
-            console.log(randomStyleNode); 
-     //  updates['/styletranfertool/'+ref.push().key] = randomStyleNode; //TODO
+            //console.log(randomStyleNodeUid);
+            var obj = jsonUserNamesNodeContent[randomStyleNodeUid]['styletranfertool'];
+            var array = Object.keys(jsonUserNamesNodeContent[randomStyleNodeUid]['styletranfertool'])
+            var randomStyleNode = obj[array[getRandomInt(0,array.length)]]; 
+        //    var randomStyleNode = getRandomNode(styleArray,'styletranfertool');
+            //console.log(randomStyleNode); 
+            updates['/styletranfertool/'+ref.push().key] = randomStyleNode; //TODO
         }
-      //for(var k = 0;k<style2bArray[i].libraryNumber;k++){//TODO
-      for(var k = 0;k<1;k++){
-            var randomLibraryNode = getRandomNode(libraryArray,'styletranfertool');
-            console.log(randomLibraryNode);
-     //  updates['/mylibrary/'+ref.push().key] = randomLibraryNode; //TODO
+      for(var k = 0;k < style2bArray[i].libraryNumber; k++){
+            var randomLibraryNode = getRandomNode(libraryArray,'mylibrary');
+        //  console.log(randomLibraryNode);
+          updates['/mylibrary/'+ref.push().key] = randomLibraryNode; //TODO
+            }
+          ref.update(updates); //TODO
         }
-     //  ref.update(updates); //TODO
     }
 }
 
 function getRandomNode(arr,innerKey){
    var random = getRandomInt(0,arr.length);
    var randomNodeUid = arr[random].uid;
-   console.log(randomNodeUid);
+   //console.log("Node UID = " + randomNodeUid);
    var obj = jsonUserNamesNodeContent[randomNodeUid][innerKey];
    var array = Object.keys(obj)
    var randomNode = obj[array[getRandomInt(0,array.length)]];
@@ -146,7 +144,7 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
-//--------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 // ANIM upload
 
@@ -406,4 +404,4 @@ matchedArray.push({'uid':item.localId,'email':item.email})}
  //console.log(item['email'])
 //setNoOfDownloads("1ewdtrdwtr1",4);
 //getNoOfDownloads("dohou.michael@gmail.com");
- */
+*/
