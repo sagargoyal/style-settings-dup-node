@@ -1,4 +1,5 @@
 "use strict";
+setTimeout(test,15000);
 var io = require('indian-ocean');
 var parse = require('csv-parse/lib/sync');
 var readDir = require('readdir');
@@ -6,7 +7,7 @@ var path = require('path');
 var fs = require("fs");
 var firebaseAdmin = require('firebase-admin');
 const firebase = require('firebase');
-var serviceAccount = require('./norahanimation-firebase-adminsdk-qmwir-c655942ff4.json');
+var serviceAccount = require('/Users/akashpaul/Documents/abvr/cred/norahanimation-firebase-adminsdk-qmwir-c655942ff4.json');
 
 firebaseAdmin.initializeApp({
     credential: firebaseAdmin.credential.cert(serviceAccount),
@@ -19,15 +20,12 @@ const app = firebase.initializeApp({
 })
 const db = app.database();
 const PROJECT_ID = "norahanimation";
-
 var styleCount =      0;
 var libraryCount =    0;
 var styleArray =     [];
 var libraryArray =   [];
 var matchedArray =   [];
-
 var style2bArray = [];
-
 
 // Push UIDs & number of style entries
 var style_data = io.readDataSync('uid_style_and_lib.csv',function (row, i, columns) {
@@ -48,6 +46,9 @@ var lib_data = io.readDataSync('uid_lib_nos.csv',function (row, i, columns) {
     //console.log(poolArray[count-1].uid);
     return row
  })
+// Read usernamesnode data
+var usernamesnode = fs.readFileSync("usernamesnode.json");
+var jsonUserNamesNodeContent = JSON.parse(usernamesnode); 
 
 // Push UID & email to list/matchedArray
 var contents = fs.readFileSync("users-30oct.json");
@@ -55,88 +56,69 @@ var jsonContent = JSON.parse(contents);
 for( var item in jsonContent.users){
     matchedArray.push({'uid':jsonContent.users[item].localId,'email':jsonContent.users[item].email});
 }
- 
+
+// Reads target UIDs & target Style numbers
 var style2b_data = io.readDataSync('style_users_2b.csv',function (row, i, columns) {
-    //libraryCount=libraryCount+1;
-    //row.number = +row.number // Convert this value to a number
-    //console.log(count+" with UID "+row.uid+" "+row.number);
+    //console.log(row.number);
     var rand = getRandomInt(1,60); //TODO:  If you want to increase the values
     style2bArray.push({'email':row.email,'styleNumber':row.number, 'libraryNumber':rand})
     //console.log(poolArray[count-1].uid);
     return row
 })
 
-
-
-var usernamesnode = fs.readFileSync("usernamesnode.json");
-var jsonUserNamesNodeContent = JSON.parse(usernamesnode);
- 
-//setNoOfDownloads("1ewdtrdwtr1",4);
-getNoOfDownloads("dohou.michael@gmail.com");
 addStylesAndLibrary();
 
-//Functions
+
+// Functions
+function test(){console.log("15 seconds up")}
 function getNoOfDownloads(email){
     console.log("Got "+email)
     var totalDownloads;
     //console.log(matchedArray)
     for (item of matchedArray){
-        if(item['email'] && item['email'].toLowerCase() == email.toLowerCase()){
-        console.log("got a bugger "+item['uid']);
+            if(item['email'] && item['email'].toLowerCase() == email.toLowerCase()){
+            console.log("got a bugger "+item['uid']);
         }
     }
     return totalDownloads;
 }
 
-
 function addStylesAndLibrary(){
-
     //for(var i =0;i<style2bArray.length;i++){ //Use this in final code TODO
-    for(var i =0;i<1;i++){
+    for(var i =0;i<5;i++){
       var updates = {};
-
       console.log(style2bArray[i].email)
-      var uid = getNoOfDownloads(style2bArray[i].email);//TODO
+      var uid = getNoOfDownloads(style2bArray[i].uid);//TODO
+      console.log(uid);
       //  var ref = db.ref.child(uid) //TODO
-      console.log(style2bArray[i].styleNumber)
-      console.log(style2bArray[i].libraryNumber)
-
-
+      console.log(style2bArray[i].styleNumber);
+      console.log(style2bArray[i].libraryNumber);
 
       //for(var j = 0 ;j<style2bArray[i].styleNumber;j++){i //TODO
       for(var j = 0 ;j<1;j++){
-         /*var random = getRandomInt(0,styleArray.length);
-         var randomStyleNodeUid = styleArray[random].uid;
-         console.log(randomStyleNodeUid);
-         var obj = jsonUserNamesNodeContent[randomStyleNodeUid]['mylibrary'];
-         var array = Object.keys(jsonUserNamesNodeContent[randomStyleNodeUid]['mylibrary'])
-         var randomStyleNode = obj[array[getRandomInt(0,array.length)]];*/
-         var randomStyleNode = getRandomNode(styleArray,'mylibrary');
-         console.log(randomStyleNode);
-         
-     //    updates['/styletranfertool/'+ref.push().key] = randomStyleNode; //TODO
-
-
-      }
-
+         /*
+            var random = getRandomInt(0,styleArray.length);
+            var randomStyleNodeUid = styleArray[random].uid;
+            console.log(randomStyleNodeUid);
+            var obj = jsonUserNamesNodeContent[randomStyleNodeUid]['mylibrary'];
+            var array = Object.keys(jsonUserNamesNodeContent[randomStyleNodeUid]['mylibrary'])
+            var randomStyleNode = obj[array[getRandomInt(0,array.length)]];
+         */
+            var randomStyleNode = getRandomNode(styleArray,'mylibrary');
+            console.log(randomStyleNode); 
+     //  updates['/styletranfertool/'+ref.push().key] = randomStyleNode; //TODO
+        }
       //for(var k = 0;k<style2bArray[i].libraryNumber;k++){//TODO
       for(var k = 0;k<1;k++){
-         var randomLibraryNode = getRandomNode(libraryArray,'styletranfertool');
-         console.log(randomLibraryNode);
-     //    updates['/mylibrary/'+ref.push().key] = randomLibraryNode; //TODO
-
-
-      }
-
-
-      //ref.update(updates); //TODO
-
+            var randomLibraryNode = getRandomNode(libraryArray,'styletranfertool');
+            console.log(randomLibraryNode);
+     //  updates['/mylibrary/'+ref.push().key] = randomLibraryNode; //TODO
+        }
+     //  ref.update(updates); //TODO
     }
-
 }
 
 function getRandomNode(arr,innerKey){
-
    var random = getRandomInt(0,arr.length);
    var randomNodeUid = arr[random].uid;
    console.log(randomNodeUid);
@@ -148,7 +130,7 @@ function getRandomNode(arr,innerKey){
 
 function setNoOfDownloads(uid,target){
     for (var i=1;i<=target;i++){
-   /* 
+    /* 
     var ref = db.ref();
     var animKey = "";
     animKey = ref.push().key;
@@ -156,13 +138,12 @@ function setNoOfDownloads(uid,target){
     console.log("pushed "+i+" times to "+uid);
     console.log(styleArray[Math.floor(Math.random()*styleArray.length)]);
     }
-    
 }
 
 function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -419,7 +400,10 @@ var json_data = io.readJson('users-30oct.json',function (row, i) {
    console.log(item.email)
 //    matchedArray.push({'uid':data.users[count2].localId,'email':data.users[count2].email})
 matchedArray.push({'uid':item.localId,'email':item.email})}
+
    count2=count2+1;
  })
  //console.log(item['email'])
-*/
+//setNoOfDownloads("1ewdtrdwtr1",4);
+//getNoOfDownloads("dohou.michael@gmail.com");
+ */
