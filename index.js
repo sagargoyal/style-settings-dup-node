@@ -53,7 +53,7 @@ for( var item in jsonContent.users){
     matchedArray.push({'uid':jsonContent.users[item].localId,'email':jsonContent.users[item].email});
 }
 // Reads target UIDs & target Style numbers
-var style2b_data = io.readDataSync('style_users_2b.csv',function (row, i, columns) {
+var style2b_data = io.readDataSync('targetstyle.csv',function (row, i, columns) {
     var rand = getRandomInt(1,60);                          // Mylibrary variator
     style2bArray.push({'email':row.email,'styleNumber':row.number, 'libraryNumber':rand})
     return row
@@ -65,14 +65,14 @@ var style2b_data = io.readDataSync('style_users_2b.csv',function (row, i, column
 
 // Functions()  ---------------------------------------------------------------------------------
 function getNoOfDownloads(email){
-    console.log("Checking presence of "+email)
+    //console.log("Checking presence of "+email)
     for (item of matchedArray){
             if(item['email'] ||item['email'].toLowerCase() == email.toLowerCase()){
-                console.log("Got the bugger "+item['uid']);
+                //console.log("Got the bugger "+item['uid']);
             return item['uid'];
             }
             else {
-                console.log("Sorry not in here")
+                //console.log("Sorry not in here")
             return 0; 
             }
     }
@@ -94,7 +94,7 @@ function addStylesAndLibrary(){
     //   console.log("For this UID "+uid);
       var ref = db.ref("usernames").child(uid) //TODO
       for(var j = 0; j < style2bArray[i].styleNumber; j++){ //TODO
-        for(var m = 0; m < i; m++){
+        for(var m = 0; m < j; m++){
          
             var random = getRandomInt(0,styleArray.length);
             var randomStyleNodeUid = styleArray[random].uid;
@@ -114,6 +114,7 @@ function addStylesAndLibrary(){
           ref.update(updates); //TODO
         }
     }
+    console.log("Done")
 }
 
 function getRandomNode(arr,innerKey){
